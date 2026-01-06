@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arborescence - onii.ovh</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; overflow: hidden; }
+        #container { width: 100vw; height: 100vh; }
+        .panel { position: absolute; background: rgba(15,15,15,0.95); padding: 15px; border-radius: 8px; border: 1px solid #333; z-index: 100; font-size: 12px; }
+        #controls { top: 15px; left: 15px; width: 280px; }
+        #controls h2 { margin-bottom: 10px; font-size: 15px; color: #4a9eff; }
+        .stat-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #222; }
+        .stat-label { color: #888; }
+        .stat-value { color: #4a9eff; font-weight: bold; }
+        .stat-value.warning { color: #ffaa44; }
+        .stat-value.danger { color: #ff4444; }
+        .section { margin-top: 12px; padding-top: 10px; border-top: 1px solid #333; }
+        .section h3 { font-size: 11px; color: #666; margin-bottom: 8px; text-transform: uppercase; }
+        #groups { max-height: 150px; overflow-y: auto; }
+        .group-item { display: flex; align-items: center; padding: 3px 0; cursor: pointer; }
+        .group-item:hover { background: rgba(74,158,255,0.1); }
+        .group-color { width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; }
+        .group-name { flex: 1; color: #aaa; font-size: 11px; }
+        .group-count { color: #666; font-size: 10px; }
+        #file-input { top: 15px; right: 15px; }
+        #file-input label { display: block; margin-bottom: 8px; color: #4a9eff; font-size: 11px; }
+        .legend { bottom: 15px; right: 15px; }
+        .legend-item { display: flex; align-items: center; margin: 4px 0; font-size: 11px; }
+        .legend-color { width: 14px; height: 14px; margin-right: 8px; border-radius: 50%; }
+        .legend-line { width: 20px; height: 2px; margin-right: 8px; }
+        #info { bottom: 15px; left: 15px; width: 350px; display: none; }
+        #info h3 { font-size: 13px; color: #4a9eff; margin-bottom: 8px; word-break: break-all; }
+        #info p { margin: 3px 0; color: #aaa; font-size: 11px; }
+        #info a { color: #4a9eff; }
+        #info .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin: 2px; }
+        #info .tag.orphan { background: #442200; color: #ffaa44; }
+        #info .tag.deadend { background: #440000; color: #ff6666; }
+        #info .tag.hub { background: #003344; color: #44ddff; }
+        .toggle { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+        .toggle label { cursor: pointer; color: #888; font-size: 11px; }
+        .toggle input { cursor: pointer; }
+        button { background: #333; border: 1px solid #555; color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; margin: 4px 2px; }
+        button:hover { background: #444; }
+        button.active { background: #4a9eff; border-color: #4a9eff; }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="controls" class="panel">
+        <h2>🌐 onii.ovh</h2>
+        <div class="stat-row"><span class="stat-label">Pages</span><span class="stat-value" id="s-pages">0</span></div>
+        <div class="stat-row"><span class="stat-label">Liens internes</span><span class="stat-value" id="s-links">0</span></div>
+        <div class="stat-row"><span class="stat-label">Pages orphelines</span><span class="stat-value warning" id="s-orphans">0</span></div>
+        <div class="stat-row"><span class="stat-label">Culs-de-sac</span><span class="stat-value danger" id="s-deadends">0</span></div>
+        <div class="stat-row"><span class="stat-label">Liens bidirectionnels</span><span class="stat-value" id="s-bidir">0</span></div>
+        <div class="section">
+            <h3>Affichage</h3>
+            <div class="toggle"><input type="checkbox" id="showArrows" checked><label for="showArrows">Flèches de direction</label></div>
+            <div class="toggle"><input type="checkbox" id="showLabels"><label for="showLabels">Noms des pages</label></div>
+            <div class="toggle"><input type="checkbox" id="autoRotate" checked><label for="autoRotate">Rotation auto</label></div>
+        </div>
+        <div class="section">
+            <h3>Dossiers</h3>
+            <div id="groups"></div>
+        </div>
+    </div>
+    <div id="file-input" class="panel">
+        <label>Charger un JSON :</label>
+        <input type="file" id="jsonFile" accept=".json">
+    </div>
+    <div class="legend panel">
+        <div class="legend-item"><div class="legend-color" style="background:#ff4444;"></div>Racine</div>
+        <div class="legend-item"><div class="legend-color" style="background:#4a9eff;"></div>Page normale</div>
+        <div class="legend-item"><div class="legend-color" style="background:#44ffdd;"></div>Hub (>10 liens)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#ffaa44;"></div>Orpheline</div>
+        <div class="legend-item"><div class="legend-color" style="background:#ff6666;"></div>Cul-de-sac</div>
+        <div class="legend-item"><div class="legend-line" style="background:#4a9eff;"></div>Lien normal</div>
+        <div class="legend-item"><div class="legend-line" style="background:#44ff44;"></div>Bidirectionnel</div>
+    </div>
+    <div id="info" class="panel"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const DATA = {"root": "https://onii.ovh/", "domain": "onii.ovh", "crawled_at": "2026-01-06T15:14:43.302774", "statistics": {"total_pages": 4, "total_external_links": 0, "total_internal_links": 7, "orphan_pages": 0, "dead_end_pages": 1, "bidirectional_links": 2}, "analysis": {"orphans": [], "dead_ends": ["https://onii.ovh/logo"], "bidirectional": [["https://onii.ovh/", "https://onii.ovh/"], ["https://onii.ovh/index.html", "https://onii.ovh/mentions-legales.html"]], "path_groups": {"/": ["https://onii.ovh/"], "/logo": ["https://onii.ovh/logo"], "/mentions-legales.html": ["https://onii.ovh/mentions-legales.html"], "/index.html": ["https://onii.ovh/index.html"]}}, "url_tree": {"logo": {"_children": {}, "_pages": ["https://onii.ovh/logo"]}, "mentions-legales.html": {"_children": {}, "_pages": ["https://onii.ovh/mentions-legales.html"]}, "index.html": {"_children": {}, "_pages": ["https://onii.ovh/index.html"]}}, "pages": {"https://onii.ovh/": {"url": "https://onii.ovh/", "final_url": "https://onii.ovh/", "title": "Onii - Production Audiovisuelle Professionnelle", "status_code": 200, "internal_links": ["https://onii.ovh/logo", "https://onii.ovh/", "https://onii.ovh/mentions-legales.html"], "external_links": [], "crawled_at": "2026-01-06T15:14:40.389433", "incoming_links": ["https://onii.ovh/", "https://onii.ovh/index.html"], "incoming_count": 2, "outgoing_count": 3}, "https://onii.ovh/logo": {"url": "https://onii.ovh/logo", "final_url": "https://onii.ovh/logo", "title": "404 Not Found", "status_code": 200, "internal_links": [], "external_links": [], "crawled_at": "2026-01-06T15:14:40.704319", "incoming_links": ["https://onii.ovh/", "https://onii.ovh/index.html"], "incoming_count": 2, "outgoing_count": 0}, "https://onii.ovh/mentions-legales.html": {"url": "https://onii.ovh/mentions-legales.html", "final_url": "https://onii.ovh/mentions-legales.html", "title": "Mentions légales - Onii Production Audiovisuelle", "status_code": 200, "internal_links": ["https://onii.ovh/index.html"], "external_links": [], "crawled_at": "2026-01-06T15:14:40.818034", "incoming_links": ["https://onii.ovh/", "https://onii.ovh/index.html"], "incoming_count": 2, "outgoing_count": 1}, "https://onii.ovh/index.html": {"url": "https://onii.ovh/index.html", "final_url": "https://onii.ovh/index.html", "title": "Onii - Production Audiovisuelle Professionnelle", "status_code": 200, "internal_links": ["https://onii.ovh/logo", "https://onii.ovh/", "https://onii.ovh/mentions-legales.html"], "external_links": [], "crawled_at": "2026-01-06T15:14:41.257020", "incoming_links": ["https://onii.ovh/mentions-legales.html"], "incoming_count": 1, "outgoing_count": 3}}, "external_links": {}};
+        let scene, camera, renderer, nodes = [], links = [], labels = [], arrows = [];
+        let selectedNode = null, autoRotate = true, showArrows = true, showLabels = false;
+        const ctrl = { drag: false, pan: false, prev: {x:0,y:0}, sph: {t:0, p:Math.PI/3, r:600}, tgt: new THREE.Vector3() };
+        const groupColors = {};
+        const colorPalette = [0x4a9eff, 0xff6b9d, 0x44dd88, 0xffaa44, 0xaa66ff, 0x44ddff, 0xff6644, 0x88ff44, 0xff44aa, 0x44aaff];
+        
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0a);
+            camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 10000);
+            updateCam();
+            renderer = new THREE.WebGLRenderer({antialias:true});
+            renderer.setSize(innerWidth, innerHeight);
+            document.getElementById('container').appendChild(renderer.domElement);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            const dl = new THREE.DirectionalLight(0xffffff, 0.5);
+            dl.position.set(100,100,100);
+            scene.add(dl);
+            
+            const cv = renderer.domElement;
+            cv.addEventListener('contextmenu', e => e.preventDefault());
+            cv.addEventListener('pointerdown', onPointerDown);
+            cv.addEventListener('pointermove', onPointerMove);
+            cv.addEventListener('pointerup', () => { ctrl.drag=false; ctrl.pan=false; });
+            cv.addEventListener('wheel', onWheel, {passive:false});
+            addEventListener('resize', onResize);
+            
+            document.getElementById('jsonFile').addEventListener('change', loadFile);
+            document.getElementById('autoRotate').addEventListener('change', e => autoRotate = e.target.checked);
+            document.getElementById('showArrows').addEventListener('change', e => { showArrows = e.target.checked; arrows.forEach(a => a.visible = showArrows); });
+            document.getElementById('showLabels').addEventListener('change', e => { showLabels = e.target.checked; labels.forEach(l => l.visible = showLabels); });
+            
+            animate();
+            if(DATA) visualize(DATA);
+        }
+        
+        function updateCam() {
+            const {t,p,r} = ctrl.sph;
+            camera.position.set(ctrl.tgt.x + r*Math.sin(p)*Math.cos(t), ctrl.tgt.y + r*Math.cos(p), ctrl.tgt.z + r*Math.sin(p)*Math.sin(t));
+            camera.lookAt(ctrl.tgt);
+        }
+        
+        function onPointerDown(e) {
+            ctrl.prev = {x:e.clientX, y:e.clientY};
+            if(e.button === 0) { ctrl.drag = true; checkClick(e); }
+            else if(e.button === 2) ctrl.pan = true;
+        }
+        
+        function onPointerMove(e) {
+            const dx = e.clientX - ctrl.prev.x, dy = e.clientY - ctrl.prev.y;
+            if(ctrl.drag) {
+                ctrl.sph.t -= dx * 0.005;
+                ctrl.sph.p = Math.max(0.1, Math.min(Math.PI-0.1, ctrl.sph.p - dy*0.005));
+                updateCam();
+            } else if(ctrl.pan) {
+                const s = ctrl.sph.r * 0.001;
+                const r = new THREE.Vector3();
+                camera.getWorldDirection(r);
+                r.cross(new THREE.Vector3(0,1,0)).normalize();
+                ctrl.tgt.addScaledVector(r, -dx*s);
+                ctrl.tgt.y += dy*s;
+                updateCam();
+            }
+            ctrl.prev = {x:e.clientX, y:e.clientY};
+        }
+        
+        function onWheel(e) {
+            e.preventDefault();
+            ctrl.sph.r = Math.max(50, Math.min(3000, ctrl.sph.r * (e.deltaY > 0 ? 1.1 : 0.9)));
+            updateCam();
+        }
+        
+        function onResize() {
+            camera.aspect = innerWidth/innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+        }
+        
+        function checkClick(e) {
+            const m = new THREE.Vector2((e.clientX/innerWidth)*2-1, -(e.clientY/innerHeight)*2+1);
+            const rc = new THREE.Raycaster();
+            rc.setFromCamera(m, camera);
+            const hit = rc.intersectObjects(nodes.map(n => n.mesh));
+            if(hit.length) { showInfo(hit[0].object); ctrl.drag = false; }
+            else hideInfo();
+        }
+        
+        function loadFile(e) {
+            const f = e.target.files[0];
+            if(f) {
+                const r = new FileReader();
+                r.onload = ev => visualize(JSON.parse(ev.target.result));
+                r.readAsText(f);
+            }
+        }
+        
+        function getPathGroup(url) {
+            try {
+                const path = new URL(url).pathname;
+                const parts = path.split('/').filter(p => p);
+                return '/' + (parts[0] || '');
+            } catch { return '/'; }
+        }
+        
+        function visualize(data) {
+            // Nettoie
+            nodes.forEach(n => scene.remove(n.mesh));
+            links.forEach(l => scene.remove(l));
+            labels.forEach(l => scene.remove(l));
+            arrows.forEach(a => scene.remove(a));
+            nodes = []; links = []; labels = []; arrows = [];
+            
+            // Stats
+            const stats = data.statistics || {};
+            document.getElementById('s-pages').textContent = stats.total_pages || 0;
+            document.getElementById('s-links').textContent = stats.total_internal_links || 0;
+            document.getElementById('s-orphans').textContent = stats.orphan_pages || 0;
+            document.getElementById('s-deadends').textContent = stats.dead_end_pages || 0;
+            document.getElementById('s-bidir').textContent = stats.bidirectional_links || 0;
+            
+            const pages = Object.values(data.pages || {});
+            const analysis = data.analysis || {};
+            const orphans = new Set(analysis.orphans || []);
+            const deadEnds = new Set(analysis.dead_ends || []);
+            const bidir = new Set((analysis.bidirectional || []).flat());
+            const pathGroups = analysis.path_groups || {};
+            
+            // Couleurs par groupe
+            let colorIdx = 0;
+            Object.keys(pathGroups).forEach(g => {
+                groupColors[g] = colorPalette[colorIdx % colorPalette.length];
+                colorIdx++;
+            });
+            
+            // UI groupes
+            const groupsDiv = document.getElementById('groups');
+            groupsDiv.innerHTML = '';
+            Object.entries(pathGroups).forEach(([g, urls]) => {
+                const div = document.createElement('div');
+                div.className = 'group-item';
+                div.innerHTML = `<div class="group-color" style="background:#${groupColors[g].toString(16).padStart(6,'0')}"></div><span class="group-name">${g}</span><span class="group-count">${urls.length}</span>`;
+                groupsDiv.appendChild(div);
+            });
+            
+            // Positions avec force-directed simplifié par groupe
+            const pos = new Map();
+            const root = data.root;
+            pos.set(root, new THREE.Vector3(0, 0, 0));
+            
+            let groupIdx = 0;
+            const groupCount = Object.keys(pathGroups).length || 1;
+            Object.entries(pathGroups).forEach(([group, urls]) => {
+                const angle = (groupIdx / groupCount) * Math.PI * 2;
+                const groupRadius = 150 + urls.length * 5;
+                const groupCenter = new THREE.Vector3(Math.cos(angle) * groupRadius, 0, Math.sin(angle) * groupRadius);
+                
+                urls.forEach((url, i) => {
+                    if(url === root) return;
+                    const localAngle = (i / urls.length) * Math.PI * 2;
+                    const localRadius = 20 + Math.sqrt(urls.length) * 15;
+                    const y = (Math.random() - 0.5) * 50;
+                    pos.set(url, new THREE.Vector3(
+                        groupCenter.x + Math.cos(localAngle) * localRadius,
+                        y,
+                        groupCenter.z + Math.sin(localAngle) * localRadius
+                    ));
+                });
+                groupIdx++;
+            });
+            
+            // Nœuds
+            const geo = new THREE.SphereGeometry(1, 16, 16);
+            pages.forEach(p => {
+                const url = p.url;
+                const position = pos.get(url) || new THREE.Vector3((Math.random()-0.5)*200, (Math.random()-0.5)*50, (Math.random()-0.5)*200);
+                const isRoot = url === root;
+                const isOrphan = orphans.has(url);
+                const isDeadEnd = deadEnds.has(url);
+                const totalLinks = (p.incoming_count || 0) + (p.outgoing_count || 0);
+                const isHub = totalLinks > 10;
+                
+                let color;
+                if(isRoot) color = 0xff4444;
+                else if(isOrphan) color = 0xffaa44;
+                else if(isDeadEnd && !isOrphan) color = 0xff6666;
+                else if(isHub) color = 0x44ffdd;
+                else color = groupColors[getPathGroup(url)] || 0x4a9eff;
+                
+                const size = isRoot ? 8 : (3 + Math.min(totalLinks * 0.3, 7));
+                const mat = new THREE.MeshPhongMaterial({color, emissive: color, emissiveIntensity: 0.2});
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.scale.setScalar(size);
+                mesh.position.copy(position);
+                mesh.userData = {
+                    url, title: p.title, 
+                    incoming: p.incoming_count || 0, 
+                    outgoing: p.outgoing_count || 0,
+                    isOrphan, isDeadEnd, isHub
+                };
+                scene.add(mesh);
+                nodes.push({mesh, url});
+            });
+            
+            // Liens avec flèches
+            const bidirSet = new Set((analysis.bidirectional || []).map(p => p.sort().join('|')));
+            pages.forEach(p => {
+                const from = pos.get(p.url);
+                if(!from) return;
+                (p.internal_links || []).forEach(targetUrl => {
+                    const to = pos.get(targetUrl);
+                    if(!to) return;
+                    
+                    const isBidir = bidirSet.has([p.url, targetUrl].sort().join('|'));
+                    const color = isBidir ? 0x44ff44 : 0x4a88cc;
+                    const opacity = isBidir ? 0.6 : 0.3;
+                    
+                    // Ligne
+                    const lmat = new THREE.LineBasicMaterial({color, transparent: true, opacity});
+                    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([from, to]), lmat);
+                    scene.add(line);
+                    links.push(line);
+                    
+                    // Flèche
+                    const dir = new THREE.Vector3().subVectors(to, from).normalize();
+                    const mid = new THREE.Vector3().addVectors(from, to).multiplyScalar(0.5);
+                    const arrowGeo = new THREE.ConeGeometry(1.5, 4, 6);
+                    const arrowMat = new THREE.MeshBasicMaterial({color, transparent: true, opacity: opacity + 0.2});
+                    const arrow = new THREE.Mesh(arrowGeo, arrowMat);
+                    arrow.position.copy(mid);
+                    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+                    arrow.visible = showArrows;
+                    scene.add(arrow);
+                    arrows.push(arrow);
+                });
+            });
+            
+            ctrl.sph.r = Math.max(300, 100 + pages.length * 3);
+            updateCam();
+        }
+        
+        function showInfo(n) {
+            const i = document.getElementById('info');
+            const d = n.userData;
+            let tags = '';
+            if(d.isOrphan) tags += '<span class="tag orphan">Orpheline</span>';
+            if(d.isDeadEnd) tags += '<span class="tag deadend">Cul-de-sac</span>';
+            if(d.isHub) tags += '<span class="tag hub">Hub</span>';
+            i.innerHTML = `
+                <h3>${d.title || 'Sans titre'}</h3>
+                <p><a href="${d.url}" target="_blank">${d.url}</a></p>
+                <p>↘ Liens sortants: ${d.outgoing} | ↙ Liens entrants: ${d.incoming}</p>
+                ${tags}
+            `;
+            i.style.display = 'block';
+            if(selectedNode) selectedNode.material.emissiveIntensity = 0.2;
+            n.material.emissiveIntensity = 0.7;
+            selectedNode = n;
+        }
+        
+        function hideInfo() {
+            document.getElementById('info').style.display = 'none';
+            if(selectedNode) { selectedNode.material.emissiveIntensity = 0.2; selectedNode = null; }
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            if(autoRotate && !ctrl.drag && !ctrl.pan) {
+                ctrl.sph.t += 0.0008;
+                updateCam();
+            }
+            renderer.render(scene, camera);
+        }
+        
+        init();
+    </script>
+</body>
+</html>

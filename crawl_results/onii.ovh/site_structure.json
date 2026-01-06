@@ -1,0 +1,135 @@
+{
+  "root": "https://onii.ovh/",
+  "domain": "onii.ovh",
+  "crawled_at": "2026-01-06T15:14:43.301586",
+  "statistics": {
+    "total_pages": 4,
+    "total_external_links": 0,
+    "total_internal_links": 7,
+    "orphan_pages": 0,
+    "dead_end_pages": 1,
+    "bidirectional_links": 2
+  },
+  "analysis": {
+    "orphans": [],
+    "dead_ends": [
+      "https://onii.ovh/logo"
+    ],
+    "bidirectional": [
+      [
+        "https://onii.ovh/",
+        "https://onii.ovh/"
+      ],
+      [
+        "https://onii.ovh/index.html",
+        "https://onii.ovh/mentions-legales.html"
+      ]
+    ],
+    "path_groups": {
+      "/": [
+        "https://onii.ovh/"
+      ],
+      "/logo": [
+        "https://onii.ovh/logo"
+      ],
+      "/mentions-legales.html": [
+        "https://onii.ovh/mentions-legales.html"
+      ],
+      "/index.html": [
+        "https://onii.ovh/index.html"
+      ]
+    }
+  },
+  "url_tree": {
+    "logo": {
+      "_children": {},
+      "_pages": [
+        "https://onii.ovh/logo"
+      ]
+    },
+    "mentions-legales.html": {
+      "_children": {},
+      "_pages": [
+        "https://onii.ovh/mentions-legales.html"
+      ]
+    },
+    "index.html": {
+      "_children": {},
+      "_pages": [
+        "https://onii.ovh/index.html"
+      ]
+    }
+  },
+  "pages": {
+    "https://onii.ovh/": {
+      "url": "https://onii.ovh/",
+      "final_url": "https://onii.ovh/",
+      "title": "Onii - Production Audiovisuelle Professionnelle",
+      "status_code": 200,
+      "internal_links": [
+        "https://onii.ovh/logo",
+        "https://onii.ovh/",
+        "https://onii.ovh/mentions-legales.html"
+      ],
+      "external_links": [],
+      "crawled_at": "2026-01-06T15:14:40.389433",
+      "incoming_links": [
+        "https://onii.ovh/",
+        "https://onii.ovh/index.html"
+      ],
+      "incoming_count": 2,
+      "outgoing_count": 3
+    },
+    "https://onii.ovh/logo": {
+      "url": "https://onii.ovh/logo",
+      "final_url": "https://onii.ovh/logo",
+      "title": "404 Not Found",
+      "status_code": 200,
+      "internal_links": [],
+      "external_links": [],
+      "crawled_at": "2026-01-06T15:14:40.704319",
+      "incoming_links": [
+        "https://onii.ovh/",
+        "https://onii.ovh/index.html"
+      ],
+      "incoming_count": 2,
+      "outgoing_count": 0
+    },
+    "https://onii.ovh/mentions-legales.html": {
+      "url": "https://onii.ovh/mentions-legales.html",
+      "final_url": "https://onii.ovh/mentions-legales.html",
+      "title": "Mentions légales - Onii Production Audiovisuelle",
+      "status_code": 200,
+      "internal_links": [
+        "https://onii.ovh/index.html"
+      ],
+      "external_links": [],
+      "crawled_at": "2026-01-06T15:14:40.818034",
+      "incoming_links": [
+        "https://onii.ovh/",
+        "https://onii.ovh/index.html"
+      ],
+      "incoming_count": 2,
+      "outgoing_count": 1
+    },
+    "https://onii.ovh/index.html": {
+      "url": "https://onii.ovh/index.html",
+      "final_url": "https://onii.ovh/index.html",
+      "title": "Onii - Production Audiovisuelle Professionnelle",
+      "status_code": 200,
+      "internal_links": [
+        "https://onii.ovh/logo",
+        "https://onii.ovh/",
+        "https://onii.ovh/mentions-legales.html"
+      ],
+      "external_links": [],
+      "crawled_at": "2026-01-06T15:14:41.257020",
+      "incoming_links": [
+        "https://onii.ovh/mentions-legales.html"
+      ],
+      "incoming_count": 1,
+      "outgoing_count": 3
+    }
+  },
+  "external_links": {}
+}

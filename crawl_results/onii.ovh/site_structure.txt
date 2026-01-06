@@ -1,0 +1,40 @@
+================================================================================
+ARBORESCENCE: https://onii.ovh/
+Crawlé le: 2026-01-06T15:14:43.301586
+================================================================================
+
+STATISTIQUES
+----------------------------------------
+Pages crawlées: 4
+Liens internes: 7
+Liens externes: 0
+Pages orphelines: 0
+Culs-de-sac: 1
+Liens bidirectionnels: 2
+
+CULS-DE-SAC (aucun lien sortant)
+----------------------------------------
+  ✗ https://onii.ovh/logo
+
+STRUCTURE PAR DOSSIER
+================================================================================
+
+// (1 pages)
+----------------------------------------
+  https://onii.ovh/
+    ↘ 3 sortants | ↙ 2 entrants
+
+/index.html/ (1 pages)
+----------------------------------------
+  https://onii.ovh/index.html
+    ↘ 3 sortants | ↙ 1 entrants
+
+/logo/ (1 pages)
+----------------------------------------
+  https://onii.ovh/logo
+    ↘ 0 sortants | ↙ 2 entrants
+
+/mentions-legales.html/ (1 pages)
+----------------------------------------
+  https://onii.ovh/mentions-legales.html
+    ↘ 1 sortants | ↙ 2 entrants
