@@ -4,6 +4,8 @@
 
 An ultra-fast asynchronous Python tool that crawls entire websites, analyzes their link structure, and generates an interactive 3D visualization in the browser.
 
+<img width="1278" height="1263" alt="image" src="https://github.com/user-attachments/assets/cd3b5d6b-2eea-4c62-92d8-a173bba7a916" />
+
 ---
 
 ## ✨ Features
